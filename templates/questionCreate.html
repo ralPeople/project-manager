@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Добавить вопрос в квиз {{ quiz_id }}</h2>
+  <form action="" method="post" novalidate>
+      {{ form.hidden_tag() }}
+
+      <p>
+          {{ form.question_text.label }}<br>
+          {{ form.question_text(size=60) }}
+      </p>
+
+      <h4>Варианты ответа:</h4>
+      {% for i in range(4) %}
+          <div>
+              {{ form.correct_index[i] }} Правильный?
+              {{ form.answers[i].text.label }} {{ form.answers[i].text(size=50) }}
+          </div>
+      {% endfor %}
+
+      <br>
+      {{ form.submit(class="btn btn-primary") }}
+  </form>
+{% endblock %}

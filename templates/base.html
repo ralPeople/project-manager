@@ -1,0 +1,35 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Microblog</title>
+      {% else %}
+      <title>Welcome to Microblog</title>
+      {% endif %}
+    </head>
+    <body>
+        <div><a href="{{ url_for('index') }}">Главная страница</a></div>
+        {% if current_user.is_authenticated %}
+            <div>Вы вошли в аккаунт, {{ current_user.login }}</div>
+            <div><a href="{{ url_for('logout') }}">Выход</a></div>
+        {% else %}
+            <div><a href="{{ url_for('login') }}">Вход</a></div>
+        {% endif %}
+        <hr>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <span style="color: red;">[{{ message }}]</span>
+                {% else %}
+                    <ul>
+                        <li>{{ message }}</li>
+                    </ul>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </body>
+</html>
