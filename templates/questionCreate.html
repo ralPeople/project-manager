@@ -1,24 +1,23 @@
-{% extends "base.html" %}
 
-{% block content %}
-<h2>Добавить вопрос в квиз {{ quiz_id }}</h2>
-  <form action="" method="post" novalidate>
-      {{ form.hidden_tag() }}
-
+      {{ question_form.hidden_tag() }}
       <p>
-          {{ form.question_text.label }}<br>
-          {{ form.question_text(size=60) }}
+          {{ question_form.question_text.label }}<br>
+          {{ question_form.question_text(size=128, style="width: 400px; height: 150px;") }}
+
+          {% for error in question_form.question_text.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
       </p>
 
       <h4>Варианты ответа:</h4>
-      {% for i in range(4) %}
-          <div>
-              {{ form.correct_index[i] }} Правильный?
-              {{ form.answers[i].text.label }} {{ form.answers[i].text(size=50) }}
-          </div>
-      {% endfor %}
+        <p>
+            {% for j, answer_form in enumerate(question_form.AnswerList) %}
+                {% include 'answerCreate.html' %}
+            {% endfor %}
 
+        </p>
+
+
+      <p>{{ question_form.add(style="width: 500px; height: 30px;") }}</p>
+      <p>{{ question_form.delete(style="width: 500px; height: 30px;") }}</p>
       <br>
-      {{ form.submit(class="btn btn-primary") }}
-  </form>
-{% endblock %}

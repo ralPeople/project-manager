@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Вход</h1>
+    <h1>Регистрация</h1>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
@@ -19,7 +19,13 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.submit_login() }}</p>
-        <p>{{ form.submit_register() }}</p>
+        <p>
+            {{ form.password_check.label }}<br>
+            {{ form.password_check(size=32) }}
+            {% for error in form.password_check.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}

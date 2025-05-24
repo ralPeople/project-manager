@@ -15,6 +15,11 @@ class User(db.Model, UserMixin):
 
     def compare_password(self, password):
         return check_password_hash(self.password, password)
+
+    def __init__(self, login, password):
+        self.login = login
+        self.password = generate_password_hash(password)
+
     def get_id(self):
         return str(self.user_id)
 

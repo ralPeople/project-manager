@@ -10,9 +10,10 @@
         <div><a href="{{ url_for('index') }}">Главная страница</a></div>
         {% if current_user.is_authenticated %}
             <div>Вы вошли в аккаунт, {{ current_user.login }}</div>
-            <div><a href="{{ url_for('logout') }}">Выход</a></div>
+            <div><a href="{{ url_for('auth_logout.logout') }}">Выход</a></div>
+            <div><a href="{{ url_for('quiz_route.create') }}">Создание своего теста</a></div>
         {% else %}
-            <div><a href="{{ url_for('login') }}">Вход</a></div>
+            <div><a href="{{ url_for('auth_login.login') }}">Вход</a></div>
         {% endif %}
         <hr>
 
