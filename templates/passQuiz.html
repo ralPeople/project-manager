@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Прохождение теста: {{ quiz.title }}</h1>
+    <br><br>
+
+    {% for question in questions %}
+        <h2> {{ question.question_text  }} </h2>
+        {% for answer in question.answer_list %}
+            <h3 {{ answer.answer_text }}   </h3>
+        {% endfor %}
+        <br>
+
+    {% endfor %}
+
+{% endblock %}

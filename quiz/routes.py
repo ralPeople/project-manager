@@ -64,7 +64,7 @@ def create():
                     if(can_submit and form.validate()):
                         flash(f"Ваш тест <{form.title.data}> успешно создан!")
                         try:
-                            quiz = Quiz(user_id=current_user.user_id, title="")
+                            quiz = Quiz(user_id=current_user.user_id, title=form.title.data)
                             db.session().add(quiz)
                             db.session().flush()
 

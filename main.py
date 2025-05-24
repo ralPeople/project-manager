@@ -9,6 +9,7 @@ from login.login import auth_login
 from login.register import auth_register
 from login.logout import auth_logout
 from quiz.routes import quiz_route
+from quiz.passQuiz import bp_pass_quiz
 from flask_login import current_user
 
 app = Flask(__name__)
@@ -37,7 +38,7 @@ def base():
 @app.route('/index')
 def index():
     quizes = Quiz.query.filter(Quiz.user_id == current_user.user_id).all()
-    for quiz in quizes:
+
 
     posts = [
         {
@@ -61,6 +62,7 @@ app.register_blueprint(auth_register)
 app.register_blueprint(auth_logout)
 login_manager.login_view = 'auth_login.login'
 app.register_blueprint(quiz_route)
+app.register_blueprint(bp_pass_quiz)
 
 
 if __name__ == '__main__':
