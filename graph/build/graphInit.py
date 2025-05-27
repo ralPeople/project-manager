@@ -7,17 +7,11 @@ from Exceptions.exceptions import InvalidEdgeException, InvalidNodeException
 
 INF = float("inf")
 
-from tkinter import messagebox
-
 S, T = None, None
 e = defaultdict(list)
 e2 = defaultdict(list)
 path_list = []
 
-def error(message):
-    print(f"ERROR: {message}")
-    messagebox.showinfo("Ошибка", message)
-    sys.exit(0)
 
 def solve(g):
     global S, T
