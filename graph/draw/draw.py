@@ -275,6 +275,7 @@ def draw_process(g, highlighted_edges, node_matrices):
 
 
 def draw_graph(g):
+    plt.clf()
     node_matrices = dict()
     highlighted_edges = []
     for i in range(1, len(g.nodes)):

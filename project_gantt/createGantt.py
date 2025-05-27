@@ -37,9 +37,8 @@ def create_gantt():
     if form.is_submitted():
         if form.submit.data and form.validate():
             result, graph_table_html, images = process_submit(form)
-            img1, img2 = images
-
             if result:
+                img1, img2 = images
                 return render_template("plot.html", img1=img1, img2=img2, table_html_text=graph_table_html)
         if form.change.data:
             return redirect(url_for("bp_create_gantt.create_gantt_text"))
@@ -54,9 +53,8 @@ def create_gantt_text():
     if form.is_submitted():
         if form.submit.data and form.validate():
             result, graph_table_html, images = process_submit_text(form)
-            img1, img2 = images
-
             if result:
+                img1, img2 = images
                 return render_template("plot.html", img1=img1, img2=img2, table_html_text=graph_table_html)
         if form.change.data:
             return redirect(url_for("bp_create_gantt.create_gantt"))
@@ -74,6 +72,7 @@ def process_submit_text(form):
                 raise InvalidInputException(f"Пустая строка с номером {i + 1}")
             ln = line.split()
             print(ln)
+            print(len(ln))
             if len(ln) > 4:
                 raise InvalidInputException(f"В строке с номером {i + 1} слишком много данных")
             if len(ln) < 4:
@@ -86,10 +85,13 @@ def process_submit_text(form):
             n = max(n, x, y)
         except InvalidInputException as e:
             flash(f"Ошибка ввода данных {e}", "error")
+            return False, 0, 0
         except ValueError as e:
             flash(f"Ошибка ввода данных, вы ввели неправильные типы данных!", "error")
+            return False, 0, 0
         except Exception as e:
             flash(f"Ошибка: {e}", "error")
+            return False, 0, 0
 
     m = len(edge_list)
     result, g = build_model(n, m, edge_list)
@@ -159,6 +161,7 @@ def build_model(n, m, edge_list):
 
 
 def build_segments_graph(g, segments):
+    plt.clf()
     points = []
     for i in range(len(segments)):
         l, r, q, _, __ = segments[i]
@@ -192,6 +195,7 @@ def build_segments_graph(g, segments):
 
 
 def build_time_graph(segments, name=""):
+    plt.clf()
     dayNumber = dict()
     dayNumber2 = dict()
     max_pos = 0

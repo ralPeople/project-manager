@@ -29,8 +29,10 @@ def create_model():
     if form.is_submitted():
         if form.submit.data and form.validate():
             result, new_html = process_submit(form)
-            if result == True:
-                return render_template("draw.html", new_html=new_html)
+            if result:
+                result_html, html = new_html
+                if result_html:
+                    return render_template("draw.html", new_html=html)
         if form.change.data:
             return redirect(url_for("bp_create_model.create_model_text"))
 
@@ -46,8 +48,10 @@ def create_model_text():
             return redirect(url_for("bp_create_model.create_model"))
         if form.submit.data and form.validate():
             result, new_html = process_submit_text(form)
-            if result == True:
-                return render_template("draw.html", new_html=new_html)
+            if result:
+                result_html, html = new_html
+                if result_html:
+                    return render_template("draw.html", new_html=html)
 
     return render_template("createModelText.html", title='Главная страница', form=form)
 
@@ -82,12 +86,15 @@ def process_submit_text(form):
             n = max(n, x, y)
         except InvalidInputException as e:
             flash(f"Ошибка ввода данных {e}", "error")
+            return False, 0
         except ValueError as e:
             flash(f"Ошибка ввода данных, вы ввели неправильные типы данных!", "error")
+            return False, 0
         except Exception as e:
             flash(f"Ошибка: {e}", "error")
+            return False, 0
     m = len(edge_list)
-    return build_model(n, m, edge_list)
+    return True, build_model(n, m, edge_list)
 
 
 def process_submit(form):
@@ -108,7 +115,7 @@ def process_submit(form):
         edge_list.append(EdgeLite(x, y, t))
 
     m = len(edge_list)
-    return build_model(n, m, edge_list)
+    return True, build_model(n, m, edge_list)
 
 
 def build_model(n, m,edge_list):
