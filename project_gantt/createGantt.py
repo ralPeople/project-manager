@@ -11,6 +11,7 @@ from graph.classes import Graph, Node, EdgeLite, Edge
 from graph.build.graphInit import build_graph
 from Exceptions.exceptions import InvalidEdgeException, InvalidNodeException, InvalidInputException
 from graph.draw.draw import draw_graph
+from graph.build.graphHtmlTable import graph_to_html
 import io
 import base64
 import matplotlib
@@ -35,9 +36,11 @@ def create_gantt():
 
     if form.is_submitted():
         if form.submit.data and form.validate():
-            result, img = process_submit(form)
+            result, graph_table_html, images = process_submit(form)
+            img1, img2 = images
+
             if result:
-                return render_template("plot.html", img_data=img)
+                return render_template("plot.html", img1=img1, img2=img2, table_html_text=graph_table_html)
         if form.change.data:
             return redirect(url_for("bp_create_gantt.create_gantt_text"))
 
@@ -50,10 +53,11 @@ def create_gantt_text():
 
     if form.is_submitted():
         if form.submit.data and form.validate():
-            result, images = process_submit_text(form)
+            result, graph_table_html, images = process_submit_text(form)
             img1, img2 = images
+
             if result:
-                return render_template("plot.html", img1=img1, img2=img2)
+                return render_template("plot.html", img1=img1, img2=img2, table_html_text=graph_table_html)
         if form.change.data:
             return redirect(url_for("bp_create_gantt.create_gantt"))
 
@@ -92,7 +96,7 @@ def process_submit_text(form):
     if not result:
         return False, 0
 
-    return True, build_gantt(g)
+    return True, graph_to_html(g), build_gantt(g)
 
 
 def process_submit(form):
@@ -117,7 +121,7 @@ def process_submit(form):
     if not result:
         return False, 0
 
-    return True, build_gantt(g)
+    return True, graph_to_html(g), build_gantt(g)
 
 
 def build_gantt(g):

@@ -125,6 +125,9 @@ def build_graph(g):
     global e, e2
     in_degree = [0] * (g.n + 1)
     out_degree = [0] * (g.n + 1)
+    e = defaultdict(list)
+    e2 = defaultdict(list)
+
     par = set()
     for i in range(len(g.edges)):
         x = g.edges[i].x

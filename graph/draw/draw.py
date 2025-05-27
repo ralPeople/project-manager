@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from graph.draw.generate_html import generate_html_table, generate_html_table_critical_paths
 
 from pyvis.network import Network
+from graph.build.graphHtmlTable import graph_to_html
 
 import webbrowser
 
@@ -216,11 +217,11 @@ def draw_process(g, highlighted_edges, node_matrices):
     generate_matrix_for_critical(g, net, G, matrix_paths)
 
     #Генерируем матрицу с текстом ввода
-    matrix_text = []
-    headers_text = ["Событие 1", "Событие 2", "Длительность", "Название"]
-    generate_matrix_for_text(g, matrix_text)
-    table_html_text = generate_html_table(matrix_text, headers_text)
-
+    #matrix_text = []
+    #headers_text = ["Событие 1", "Событие 2", "Длительность", "Название"]
+    #generate_matrix_for_text(g, matrix_text)
+    #table_html_text = generate_html_table(matrix_text, headers_text)
+    table_html_text = graph_to_html(g)
 
 
     table_critical_paths = generate_html_table_critical_paths(matrix_paths, "Критические пути")
