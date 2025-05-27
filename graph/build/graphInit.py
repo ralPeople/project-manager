@@ -3,6 +3,7 @@ import sys
 from collections import defaultdict, deque
 from typing import List, Tuple
 from graph.classes import Node, Edge, Graph
+from Exceptions.exceptions import InvalidEdgeException, InvalidNodeException
 
 INF = float("inf")
 
@@ -109,9 +110,9 @@ def mark_source(g, in_degree, out_degree):
     sinks = sum(1 for x in out_degree[1:] if x == 0)
 
     if sources != 1:
-        error("В графе больше 1 начального события")
+        raise InvalidNodeException("В графе больше одного начального события")
     if sinks != 1:
-        error("В графке больше 1 конечного события")
+        raise InvalidNodeException("В графе больше одного конечного события")
     S = 1
     T = g.n
 
@@ -126,9 +127,9 @@ def build_graph(g):
         y = g.edges[i].y
         weight = g.edges[i].t
         if (x, y) in par:
-            error("В графе присутствуют кратные ребра")
+            raise InvalidEdgeException(f"В графе есть кратные ребра {x} -> {y}")
         if x >= y:
-            error("В графе номер начального события не меньше номера конечного")
+            raise InvalidEdgeException(f"В графе номер начального события не меньше номера конечного: {x} и {y}")
         par.add((x, y))
         edge = Edge(x, y, weight[0])
         e[x].append(edge)

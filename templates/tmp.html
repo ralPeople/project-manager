@@ -1,0 +1,128 @@
+<head>
+    <style>
+        input[type="number"] {
+            width: 50px;
+        }
+        input[type="text"] {
+            width: 150px;
+        }
+        .edge-block {
+            border: 1px solid #aaa;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-width: 1000px;
+        }
+    </style>
+</head>
+
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Добавьте рёбра (связи)</h2>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div id="edge-list">
+        {% for subform in form.edges %}
+            <div class="edge-block">
+                {{ subform.node1.label }} {{ subform.node1() }}
+                {{ subform.node2.label }} {{ subform.node2() }}
+                {{ subform.time.label }} {{ subform.time() }}
+                {{ subform.job_name.label }} {{ subform.job_name() }} <br>
+                <button type="button" onclick="removeEdge(this)">Удалить</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" onclick="addEdge()">Добавить ребро</button>
+    {{ form.submit() }}
+</form>
+
+<!-- Шаблон нового ребра -->
+<template id="edge-template">
+    <div class="edge-block">
+        <label>Первое событие</label>
+        <input type="number" name="edges-__index__-node1" step="any" required size="5">
+        <label>Второе событие</label>
+        <input type="number" name="edges-__index__-node2" step="any" required size="5">
+        <label>Длительность</label>
+        <input type="number" name="edges-__index__-time" step="any" required size="5">
+        <label>Название (можно пустое)</label>
+        <input type="text" name="edges-__index__-job_name" size="15"><br>
+        <button type="button" onclick="removeEdge(this)">Удалить</button>
+    </div>
+</template>
+
+<script>
+    let index = {{ form.edges|length }};
+
+    // Загрузить данные из localStorage и заполнить форму
+    function loadEdges() {
+        const saved = localStorage.getItem('edges');
+        if (saved) {
+            const edges = JSON.parse(saved);
+            // Очистим текущие поля
+            document.getElementById('edge-list').innerHTML = '';
+            edges.forEach((edge, i) => {
+                addEdge(edge);
+            });
+        } else {
+            if(index === 0) addEdge();  // если нет ни одного поля - создадим пустое
+        }
+    }
+
+    // Сохраняем текущие данные в localStorage
+    function saveEdges() {
+        const edges = [];
+        document.querySelectorAll('#edge-list .edge-block').forEach(div => {
+            edges.push({
+                node1: div.querySelector('input[name$="-node1"]').value,
+                node2: div.querySelector('input[name$="-node2"]').value,
+                time: div.querySelector('input[name$="-time"]').value,
+                job_name: div.querySelector('input[name$="-job_name"]').value,
+            });
+        });
+        localStorage.setItem('edges', JSON.stringify(edges));
+    }
+
+    // Добавляем новое ребро, если data передан - заполняем поля
+    function addEdge(data = {}) {
+        const template = document.getElementById('edge-template').innerHTML;
+        let rendered = template.replace(/__index__/g, index);
+        const container = document.createElement('div');
+        container.innerHTML = rendered;
+        const edgeBlock = container.firstElementChild;
+
+        // Заполняем если есть данные
+        if(data.node1) edgeBlock.querySelector('input[name$="-node1"]').value = data.node1;
+        if(data.node2) edgeBlock.querySelector('input[name$="-node2"]').value = data.node2;
+        if(data.time) edgeBlock.querySelector('input[name$="-time"]').value = data.time;
+        if(data.job_name) edgeBlock.querySelector('input[name$="-job_name"]').value = data.job_name;
+
+        document.getElementById('edge-list').appendChild(edgeBlock);
+        index++;
+        attachInputListeners();
+        saveEdges();
+    }
+
+    // Удаляем ребро
+    function removeEdge(button) {
+        button.parentElement.remove();
+        saveEdges();
+    }
+
+    // При изменении input сохраняем данные
+    function attachInputListeners() {
+        document.querySelectorAll('#edge-list input').forEach(input => {
+            input.oninput = saveEdges;
+        });
+    }
+
+    // При загрузке страницы
+    window.onload = () => {
+        loadEdges();
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+<html>
+    {% extends "base.html" %}
+
+    {% block content %}
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <p>{{ form.model(style="width: 200px; height: 100px;") }}</p>
+        <p>{{ form.gantt(style="width: 200px; height: 100px;") }}</p>
+
+    </form>
+    {% endblock %}
+</html>
+
+
+

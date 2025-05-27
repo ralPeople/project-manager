@@ -5,71 +5,118 @@ import copy
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
+from graph.draw.generate_html import generate_html_table, generate_html_table_critical_paths
+
 from pyvis.network import Network
+
 import webbrowser
 
 
-def generate_html_table(matrix, headers):
-    table_html = "<table border='1' style='border-collapse: collapse; text-align: center;'>"
-    # Добавляем заголовки
-    table_html += "<tr>"
-    for header in headers:
-        table_html += f"<th>{header}</th>"
-    table_html += "</tr>"
+def generate_matrix_for_critical(g, net, G, matrix_paths):
+    cur_path = 0
+    for lst in g.list_of_critical_paths:
+        cur_line = []
+        cur_path += 1
+        cur_line.append(str(cur_path))
+        for i in range(1, len(lst)):
+            for edge in net.edges:
+                if (edge['from'] == lst[i - 1] and edge['to'] == lst[i] or edge['to'] == lst[i - 1] and edge['from'] ==
+                        lst[i]):
+                    edge_name = G[edge['from']][edge['to']]['weight'][1]
+                    cur_line.append(edge_name)
+                    break
+        cur_line2 = [cur_line[0]]
+        for i in range(len(cur_line) - 1, 0, -1):
+            cur_line2.append(cur_line[i])
+        cur_line = copy.deepcopy(cur_line2)
+        matrix_paths.append(cur_line)
 
-    # Добавляем строки матрицы
-    for row in matrix:
-        table_html += "<tr>"
-        for value in row:
-            table_html += f"<td>{value}</td>"
-        table_html += "</tr>"
-    table_html += "</table>"
-    return table_html
+
+def generate_matrix_for_edges(g, matrix_edges, cnt_nodes):
+    for i in range(1, cnt_nodes+1):
+        for el in g.e[i]:
+            cur_line = []
+            cur_line.append((el.x, el.y))
+            cur_line.append(el.t)
+            cur_line.append(el.info.Trn)
+            cur_line.append(el.info.Tro)
+            cur_line.append(el.info.Tpo)
+            cur_line.append(el.info.Tpn)
+            cur_line.append(el.info.Rp)
+            cur_line.append(el.info.Rc)
+            matrix_edges.append(copy.deepcopy(cur_line))
 
 
-def generate_html_table_critical_paths(matrix, header):
-    """
-    Генерирует HTML для таблицы с переменным числом элементов в строках.
-    У заголовка есть только первый столбец.
-    """
-    table_html = "<table border='1' style='border-collapse: collapse; width: 80%; margin: 10px auto;'>"
+def generate_matrix_for_nodes(g, matrix_nodes, cnt_nodes):
+    for i in range(1, cnt_nodes + 1):
+        cur_line = []
+        cur_line.append(i)
+        cur_line.append(g.nodes[i].Tr)
+        cur_line.append(g.nodes[i].Tp)
+        cur_line.append(g.nodes[i].R)
+        matrix_nodes.append(copy.deepcopy(cur_line))
 
-    # Добавляем заголовок только для первого столбца
-    table_html += "<tr>"
-    table_html += f"<th>{header}</th>"
-    table_html += "</tr>"
 
-    # Заполняем строки таблицы
-    for row in matrix:
-        table_html += "<tr>"
-        for index, cell in enumerate(row):
-            if index == 0:  # Первая ячейка
-                table_html += f"<td style='font-weight: bold;'>{cell}</td>"
-            else:  # Остальные ячейки
-                table_html += f"<td>{cell}</td>"
-        table_html += "</tr>"
+def set_nodes_style(net, cnt_nodes, node_matrices):
+    for node in net.nodes:
+        node['color'] = 'skyblue'  # Устанавливаем красный цвет для вершин
+        node['size'] = 20  # Устанавливаем размер вершин
+        node_id = node['id']
+        if(node_id == 1):
+            node['color'] = 'lightgreen'
+        if(node_id == cnt_nodes):
+            node['color'] = 'yellow'
 
-    table_html += "</table>"
-    return table_html
+        node['shape'] = 'circle'  # Текст будет внутри
+        if node_id in node_matrices:
+            # Форматируем строку матрицы для отображения
+            #matrix_str = f"<b>{matrix[0][0]} {matrix[0][1]}<br>{matrix[1][0]} {matrix[1][1]}</b>"
+            matrix_str = "\n".join(" ".join(map(str, row)) for row in node_matrices[node_id])
+            node['label'] = f"{matrix_str}"  # Добавляем матрицу в качестве метки
+            node['font'] = {"size": 16}
 
-def draw_graph(g, highlighted_edges, node_matrices):
+
+def set_edges_style(G, net, highlighted_edges):
+    for edge in net.edges:
+        edge['color'] = 'green'  # Устанавливаем синий цвет для рёбер
+        edge['width'] = 2  # Устанавливаем толщину рёбер
+
+    for edge in net.edges:
+        edge['arrows'] = 'to'  # Стрелка будет направлена от исходной вершины к конечной
+
+    for edge in net.edges:
+        edge['width'] = 2  # Устанавливаем толщину рёбер
+        if (edge['from'], edge['to']) in highlighted_edges or (edge['to'], edge['from']) in highlighted_edges:  # Если ребро в списке выделенных
+            edge['color'] = 'red'  # Выделяем ребро оранжевым цветом
+        else:
+            edge['color'] = 'gray'  # Для других рёбер цвет синий
+
+        # Добавление веса рёбер
+        edge_value = G[edge['from']][edge['to']]['weight'][0]
+        edge_name = G[edge['from']][edge['to']]['weight'][1]
+        edge['label'] = f"{edge_value}; {edge_name}"  # Вставляем вес как всплывающее сообщение
+        edge['font'] = {'size': 20}  # Увеличиваем размер шрифта
+
+def draw_process(g, highlighted_edges, node_matrices):
 
     # Список рёбер (может быть неориентированным или ориентированным)
-
     G = nx.DiGraph()  # Для ориентированного графа
-
-
     # Добавляем рёбра в граф
     #G.add_weighted_edges_from(edges)
     for i in range(len(g.edges)):
-        x, y, weight = g.edges[i]
+        x = g.edges[i].x
+        y = g.edges[i].y
+        weight = g.edges[i].t
         G.add_edge(x, y, weight=weight)
 
     #Копия графа
     G_numeric = nx.Graph()
 
     for i in range(len(g.edges)):
-        x, y, weight = g.edges[i]
+        x = g.edges[i].x
+        y = g.edges[i].y
+        weight = g.edges[i].t
         G_numeric.add_edge(x, y, weight=weight[0]+10*len(weight[1]))
 
     # Позиции узлов
@@ -77,21 +124,10 @@ def draw_graph(g, highlighted_edges, node_matrices):
     x_positions = {node: i for i, node in enumerate(G.nodes)}
     cnt_nodes = 0
     for i in range(len(g.edges)):
-        x, y, weight = g.edges[i]
+        x = g.edges[i].x
+        y = g.edges[i].y
         cnt_nodes = max(cnt_nodes, x, y)
 
-    d = [0] * (cnt_nodes+1)
-    for i in range(cnt_nodes+1):
-        for j in range(len(g.edges)):
-            x, y, weight = g.edges[j]
-            d[y] = max(d[y], d[x] + 1)
-
-    # Обновляем позицию для каждой вершины, сохраняя y-координату
-    #for node in pos:
-     #   pos[node][0] = d[node]  # Меняем только координату по X
-     #  pos[node][1] = node  # Меняем только координату по Y
-
-    #pos = graphviz_layout(G_numeric, prog='dot')
     # Визуализация графа
     plt.figure(figsize=(8, 6))
     #Рисуем граф
@@ -134,110 +170,43 @@ def draw_graph(g, highlighted_edges, node_matrices):
 
     net = Network(notebook=True, directed=True)
     net.from_nx(G_numeric)
-    for edge in net.edges:
-        edge['arrows'] = 'to'  # Стрелка будет направлена от исходной вершины к конечной
+
 
     # Устанавливаем физические свойства
     net.force_atlas_2based(gravity=-60, central_gravity=0.01, spring_length=150, spring_strength=0.05)
 
     #net.show("graph.html")
 
-    for edge in net.edges:
-        edge['color'] = 'green'  # Устанавливаем синий цвет для рёбер
-        edge['width'] = 2  # Устанавливаем толщину рёбер
 
     # Настройка цвета и размера вершин
-    for node in net.nodes:
-        node['color'] = 'skyblue'  # Устанавливаем красный цвет для вершин
-        node['size'] = 20  # Устанавливаем размер вершин
 
-
-        node_id = node['id']
-        if(node_id == 1):
-            node['color'] = 'lightgreen'
-        if(node_id == cnt_nodes):
-            node['color'] = 'yellow'
-
-        node['shape'] = 'circle'  # Текст будет внутри
-        if node_id in node_matrices:
-            # Форматируем строку матрицы для отображения
-            #matrix_str = f"<b>{matrix[0][0]} {matrix[0][1]}<br>{matrix[1][0]} {matrix[1][1]}</b>"
-            matrix_str = "\n".join(" ".join(map(str, row)) for row in node_matrices[node_id])
-            node['label'] = f"{matrix_str}"  # Добавляем матрицу в качестве метки
-            node['font'] = {"size": 16}
 
     print(highlighted_edges)
-
-    for edge in net.edges:
-        edge['width'] = 2  # Устанавливаем толщину рёбер
-        if (edge['from'], edge['to']) in highlighted_edges or (edge['to'], edge['from']) in highlighted_edges:  # Если ребро в списке выделенных
-            edge['color'] = 'red'  # Выделяем ребро оранжевым цветом
-        else:
-            edge['color'] = 'gray'  # Для других рёбер цвет синий
-
-        # Добавление веса рёбер
-        edge_value = G[edge['from']][edge['to']]['weight'][0]
-        edge_name = G[edge['from']][edge['to']]['weight'][1]
-        edge['label'] = f"{edge_value}; {edge_name}"  # Вставляем вес как всплывающее сообщение
-        edge['font'] = {'size': 20}  # Увеличиваем размер шрифта
+    set_nodes_style(net, cnt_nodes, node_matrices)
+    set_edges_style(G, net, highlighted_edges)
 
     headers_edges = ["(i, j)", "t(i,j)", "Трн(i,j)", "Tро(i,j)","Tпн(i,j)","Тпо(i,j)","Rп(i,j)","Rс(i,j)"]
 
+    #Генерируем выводимые параметры для ребер
     matrix_edges = []
-    for i in range(1, cnt_nodes+1):
-        for el in g.e[i]:
-            cur_line = []
-            cur_line.append((el.x, el.y))
-            cur_line.append(el.t)
-            cur_line.append(el.Trn)
-            cur_line.append(el.Tro)
-            cur_line.append(el.Tpo)
-            cur_line.append(el.Tpn)
-            cur_line.append(el.Rp)
-            cur_line.append(el.Rc)
-            matrix_edges.append(copy.deepcopy(cur_line))
+    generate_matrix_for_edges(g, matrix_edges, cnt_nodes)
 
+    #Генерируем html таблицы
     html_content = net.generate_html()
     table_html_edges = generate_html_table(matrix_edges, headers_edges)
 
-    headers_nodes = ["Событие i","Тр(i)","Тп(i)","R(i)"]
+    headers_nodes = ["Событие i", "Тр(i)", "Тп(i)", "R(i)"]
+
+    #Генерируем матрицы для вершин
     matrix_nodes = []
-    for i in range(1,cnt_nodes+1):
-        cur_line = []
-        cur_line.append(i)
-        cur_line.append(g.nodes[i].Tr)
-        cur_line.append(g.nodes[i].Tp)
-        cur_line.append(g.nodes[i].R)
-        matrix_nodes.append(copy.deepcopy(cur_line))
+    generate_matrix_for_nodes(g, matrix_nodes, cnt_nodes)
 
     table_html_nodes = generate_html_table(matrix_nodes, headers_nodes)
-    #html_content = net.generate_html()
-    #html_content = html_content.replace(
-    #    "</body>",
-    #    f"<h3 style='text-align: center;'>Временные параметры работ</h3>{table_html}</body>"
-    #)
 
-    #with open("graph.html", "w", encoding="utf-8") as f:
-    #    f.write(html_content)
-
+    #Генерируем матрицу критических путей
     matrix_paths = []
+    generate_matrix_for_critical(g, net, G, matrix_paths)
 
-    cur_path = 0
-    for lst in g.list_of_critical_paths:
-        cur_line = []
-        cur_path += 1
-        cur_line.append(str(cur_path))
-        for i in range(1, len(lst)):
-            for edge in net.edges:
-                if(edge['from'] == lst[i - 1] and edge['to'] == lst[i] or edge['to'] == lst[i - 1] and edge['from'] == lst[i]):
-                    edge_name = G[edge['from']][edge['to']]['weight'][1]
-                    cur_line.append(edge_name)
-                    break
-        cur_line2 = [cur_line[0]]
-        for i in range(len(cur_line) - 1, 0, -1):
-            cur_line2.append(cur_line[i])
-        cur_line = copy.deepcopy(cur_line2)
-        matrix_paths.append(cur_line)
 
     table_critical_paths = generate_html_table_critical_paths(matrix_paths, "Критические пути")
     html_content = f"""
@@ -274,17 +243,19 @@ def draw_graph(g, highlighted_edges, node_matrices):
     </body>
     </html>
     """
-    with open("graph.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
+    #with open("graph.html", "w", encoding="utf-8") as f:
+    #    f.write(html_content)
     #net.show("graph.html")
-    file_path = "graph.html"
+    #file_path = "graph.html"
     #net.show(file_path)
 
     # Открываем граф в браузере
-    webbrowser.open(file_path)
+    #webbrowser.open(file_path)
+
+    return html_content
 
 
-def draw(g):
+def draw_graph(g):
     node_matrices = dict()
     highlighted_edges = []
     for i in range(1, len(g.nodes)):
@@ -293,7 +264,8 @@ def draw(g):
         for i in range(1, len(lst)):
             highlighted_edges.append((lst[i - 1], lst[i]))
 
-    #draw_graph(g, highlighted_edges, node_matrices)
+    return draw_process(g, highlighted_edges, node_matrices)
+
 
 
 
