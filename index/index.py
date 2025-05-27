@@ -20,8 +20,9 @@ def index():
     form = MainForm()
     if form.is_submitted():
         if form.model.data:
-            print(111)
             return redirect(url_for('bp_create_model.create_model'))
+        if form.gantt.data:
+            return redirect(url_for("bp_create_gantt.create_gantt"))
         #if form.gantt.data:
 
 

@@ -1,0 +1,109 @@
+<head>
+    <style>
+        input[type="number"] {
+            width: 50px;
+        }
+        input[type="text"] {
+            width: 150px;
+        }
+        .edge-block {
+            border: 1px solid #aaa;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-width: 1000px;
+        }
+    </style>
+</head>
+
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Добавьте ребра (связи)</h2>
+
+<form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <h1>{{ form.change.label }} {{ form.change() }} </h1> <br>
+    <br>
+
+    <div id="edge-list">
+        {% for subform in form.edges %}
+            <div class="edge-block">
+                {{ subform.csrf_token }}
+                {{ subform.node1.label }} {{ subform.node1(type="number") }}
+                {% for error in subform.node1.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+
+                {{ subform.node2.label }} {{ subform.node2(type="number") }}
+
+                {% for error in subform.node2.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+
+                {{ subform.time.label }} {{ subform.time(type="number") }}
+                {% for error in subform.time.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+
+                {{ subform.number.label }} {{ subform.number(type="number") }}<br>
+                {% for error in subform.number.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+                <button type="button" onclick="removeEdge(this)">Удалить</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" onclick="addEdge()">Добавить ребро</button>
+    {{ form.submit() }}
+</form>
+
+<!-- Шаблон нового ребра -->
+<template id="edge-template">
+    <div class="edge-block">
+        <label>Первое событие</label>
+        <input type="number" name="edges-__index__-node1" step="any" required>
+        <label>Второе событие</label>
+        <input type="number" name="edges-__index__-node2" step="any" required>
+        <label>Длительность</label>
+        <input type="number" name="edges-__index__-time" step="any" required>
+        <label>Количество исполнителей</label>
+        <input type="number" name="edges-__index__-number" size="15"><br>
+        <button type="button" onclick="removeEdge(this)">Удалить</button>
+    </div>
+</template>
+
+<script>
+    let index = {{ form.edges|length }};
+
+    function addEdge() {
+        const template = document.getElementById('edge-template').innerHTML;
+        const rendered = template.replace(/__index__/g, index);
+        document.getElementById('edge-list').insertAdjacentHTML('beforeend', rendered);
+        index++;
+    }
+
+    function removeEdge(button) {
+        // Находим ближайший родитель с классом edge-block
+        const edgeBlock = button.closest('.edge-block');
+        if (edgeBlock) {
+            edgeBlock.remove();
+            reindexEdges();
+        }
+    }
+
+    function reindexEdges() {
+        const edgeBlocks = document.querySelectorAll('#edge-list .edge-block');
+        edgeBlocks.forEach((block, idx) => {
+            for (const input of block.querySelectorAll('input')) {
+                const name = input.name;
+                // Заменяем индекс в имени поля на новый idx
+                const newName = name.replace(/edges-\d+-/, `edges-${idx}-`);
+                input.name = newName;
+            }
+        });
+        index = edgeBlocks.length;
+    }
+</script>
+
+{% endblock %}
