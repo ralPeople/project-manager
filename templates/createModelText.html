@@ -1,0 +1,30 @@
+<style>
+textarea {
+    width: 500px;
+    height: 200px;
+}
+</style>
+
+<html>
+    {% extends "base.html" %}
+
+    {% block content %}
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <h1>{{ form.change.label }} {{ form.change() }} </h1> <br>
+        <br>
+
+          {{ form.text.label }} {{ form.text() }}
+          {% for error in form.text.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+          <br>
+        {{ form.submit.label }} {{ form.submit() }}<br>
+
+    </form>
+    {% endblock %}
+</html>
+
+
+

@@ -87,6 +87,10 @@ def solve(g):
                 dfs(edge.y)
                 path.pop()
 
+    for i in range(1,n+1):
+        print(i)
+        for j in range(len(e2[i])):
+            print(e2[i][j].x, e2[i][j].y)
     print("\nList of critical paths:")
     path.append(n)
     dfs(n)

@@ -12,6 +12,14 @@ from pyvis.network import Network
 
 import webbrowser
 
+def generate_matrix_for_text(g, matrix_text):
+    for i in range(len(g.edges)):
+        x = g.edges[i].x
+        y = g.edges[i].y
+        t = g.edges[i].t[0]
+        name = g.edges[i].t[1]
+        matrix_text.append([x, y, t, name])
+
 
 def generate_matrix_for_critical(g, net, G, matrix_paths):
     cur_path = 0
@@ -207,6 +215,13 @@ def draw_process(g, highlighted_edges, node_matrices):
     matrix_paths = []
     generate_matrix_for_critical(g, net, G, matrix_paths)
 
+    #Генерируем матрицу с текстом ввода
+    matrix_text = []
+    headers_text = ["Событие 1", "Событие 2", "Длительность", "Название"]
+    generate_matrix_for_text(g, matrix_text)
+    table_html_text = generate_html_table(matrix_text, headers_text)
+
+
 
     table_critical_paths = generate_html_table_critical_paths(matrix_paths, "Критические пути")
     html_content = f"""
@@ -233,6 +248,7 @@ def draw_process(g, highlighted_edges, node_matrices):
     </head>
     <body>
         <h2>Граф</h2>
+        Зеленая: стартовая вершина, желтая: конечная
         {html_content}  <!-- Граф PyVis -->
         <h3>Временные параметры работ</h3>
         {table_html_edges}  <!-- Первая таблица -->
@@ -240,6 +256,8 @@ def draw_process(g, highlighted_edges, node_matrices):
         {table_html_nodes}  <!-- Вторая таблица -->
         <h5>Критические пути (до 10)</h5>
         {table_critical_paths}  <!-- Вторая таблица -->
+        <h6>Введенная таблица в формате текста</h6>
+        {table_html_text}  <!-- Вторая таблица --> 
     </body>
     </html>
     """

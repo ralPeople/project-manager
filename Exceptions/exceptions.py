@@ -5,3 +5,6 @@ class InvalidEdgeException(Exception):
 
 class InvalidNodeException(Exception):
     pass
+
+class InvalidInputException(Exception):
+    pass

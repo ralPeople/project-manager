@@ -4,8 +4,8 @@ from wtforms.validators import DataRequired, NumberRange
 
 
 class EdgeForm(FlaskForm):
-    node1 = StringField("Первое событие",validators=[DataRequired()], render_kw={"size": 1})
-    node2 = StringField("Второе событие",validators=[DataRequired()], render_kw={"size": 1})
+    node1 = IntegerField("Первое событие",validators=[DataRequired(), NumberRange(min=0, message="Значение должно быть неотрицательным")], render_kw={"size": 1})
+    node2 = IntegerField("Второе событие",validators=[DataRequired(), NumberRange(min=0, message="Значение должно быть неотрицательным")], render_kw={"size": 1})
     time = FloatField("Длительность",validators=[DataRequired(), NumberRange(min=0, message="Значение должно быть неотрицательным")], render_kw={"size": 1})
     job_name = StringField("Название (можно пустое)")
 
@@ -14,10 +14,14 @@ class EdgeForm(FlaskForm):
 
 
 class EdgeFormList(FlaskForm):
-    edges = FieldList(FormField(EdgeForm))
+    edges = FieldList(FormField(EdgeForm), min_entries=1)
     submit = SubmitField('Нарисовать сетевую модель')
+    change = SubmitField("Способ ввода через текст")
+
 
 
 class EdgeFormTextForm(FlaskForm):
-    text = TextAreaField(validators=[DataRequired()])
+    text = TextAreaField("Ввод данных", validators=[DataRequired()])
+    submit = SubmitField('Нарисовать сетевую модель')
+    change = SubmitField("Способ ввода через формы")
 
