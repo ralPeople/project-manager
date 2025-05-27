@@ -72,10 +72,10 @@ def process_submit_text(form):
                 raise InvalidInputException(f"В строке с номером {i + 1} слишком мало данных")
             if len(ln) == 3:
                 x, y, t = ln
-                t = [float(t), ""]
+                t = [int(t), ""]
             else:
                 x, y, t, name = ln
-                t = [float(t), name]
+                t = [int(t), name]
             x = int(x)
             y = int(y)
             edge_list.append(EdgeLite(x, y, t))

@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, NumberRange
 class EdgeForm(FlaskForm):
     node1 = IntegerField("Первое событие",validators=[DataRequired(), NumberRange(min=1, message="Значение должно быть положительным")], render_kw={"size": 1})
     node2 = IntegerField("Второе событие",validators=[DataRequired(), NumberRange(min=1, message="Значение должно быть положительным")], render_kw={"size": 1})
-    time = FloatField("Длительность",validators=[DataRequired(), NumberRange(min=0, message="Значение должно быть неотрицательным")], render_kw={"size": 1})
+    time = IntegerField("Длительность",validators=[DataRequired(), NumberRange(min=0, message="Значение должно быть неотрицательным")], render_kw={"size": 1})
     job_name = StringField("Название (можно пустое)")
 
     class Meta:

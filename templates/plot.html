@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>График загрузки (до оптимизации)</h2>
-    <img src="data:image/png;base64,{{ img_data }}" alt="Graph">
+    <h2>График загрузки </h2>
+    <img src="data:image/png;base64,{{ img1|safe }}" alt="Graph">
+    <br><br><br>
+    <h3>График привязки </h3>
+    <img src="data:image/png;base64,{{ img2|safe }}" alt="Graph">
+    <br><br><br>
 {% endblock %}
