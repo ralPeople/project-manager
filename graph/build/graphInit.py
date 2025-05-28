@@ -76,7 +76,7 @@ def solve(g):
             cnt += 1
             return
         for edge in e2[x]:
-            if nodes[edge.y].R == 0:
+            if nodes[edge.y].R == 0 and nodes[edge.x].Tr == nodes[edge.y].Tr + edge.t:
                 path.append(copy.deepcopy(edge.y))
                 dfs(edge.y)
                 path.pop()

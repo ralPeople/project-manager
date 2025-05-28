@@ -280,9 +280,14 @@ def draw_graph(g):
     highlighted_edges = []
     for i in range(1, len(g.nodes)):
         node_matrices[i] = [[i, g.nodes[i].Tr], [g.nodes[i].R, g.nodes[i].Tp]]
-    for lst in g.list_of_critical_paths:
-        for i in range(1, len(lst)):
-            highlighted_edges.append((lst[i - 1], lst[i]))
+
+    for edge in g.edges:
+        if g.nodes[edge.y].R == 0 and g.nodes[edge.y].Tr == g.nodes[edge.x].Tr + edge.t[0]:
+            highlighted_edges.append((edge.x, edge.y))
+
+    #for lst in g.list_of_critical_paths:
+    #    for i in range(1, len(lst)):
+    #        highlighted_edges.append((lst[i - 1], lst[i]))
 
     return draw_process(g, highlighted_edges, node_matrices)
 
