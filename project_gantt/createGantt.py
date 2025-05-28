@@ -129,6 +129,7 @@ def process_submit(form):
 def build_gantt(g):
     segments = []
     work_q = dict()
+    names = []
     for i in range(len(g.edges)):
         x = g.edges[i].x
         y = g.edges[i].y
@@ -138,8 +139,9 @@ def build_gantt(g):
     for j in range(1, len(g.nodes) + 1):
         for edge in g.e[j]:
             segments.append((edge.info.Trn, edge.info.Trn + edge.t, work_q[edge.x, edge.y], edge.info.Rc, edge.info.Rp))
+            names.append((edge.x, edge.y))
 
-    return build_segments_graph(g, segments), build_time_graph(segments)
+    return build_segments_graph(g, segments, names), build_time_graph(segments)
 
 
 def build_model(n, m, edge_list):
@@ -160,13 +162,16 @@ def build_model(n, m, edge_list):
         return False, 0
 
 
-def build_segments_graph(g, segments):
+def build_segments_graph(g, segments, names):
     plt.clf()
     points = []
+    name = []
     for i in range(len(segments)):
         l, r, q, _, __ = segments[i]
         points.append((l, i + 1, q))
+        name.append(names[i])
         points.append((r, i + 1, q))
+        name.append(names[i])
 
     for i in range(len(points) - 1):
         x1, y1, q1 = points[i]
@@ -177,6 +182,7 @@ def build_segments_graph(g, segments):
             plt.text((x1 + x2) / 2, y1 + 0.1, str(q1), ha='center', va='bottom', fontsize=10, color='black')
             plt.plot([x1, x1], [y1 - 0.2, y1 + 0.2], 'k-')
             plt.plot([x2, x2], [y1 - 0.2, y1 + 0.2], 'k-')
+            plt.text(x1 - 0.5, y1, name[i], ha='right', va='center', fontsize=10, color='black')  # имя отрезка
 
     plt.yticks([])
     plt.grid(True)
