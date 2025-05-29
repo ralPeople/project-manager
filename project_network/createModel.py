@@ -12,6 +12,12 @@ from graph.build.graphInit import build_graph
 from Exceptions.exceptions import InvalidEdgeException, InvalidNodeException, InvalidInputException
 from graph.draw.draw import draw_graph
 
+from markupsafe import escape
+
+
+def escape_html(text):
+    return escape(text)
+
 
 class LoginForm(FlaskForm):
     username = StringField('Логин', validators=[DataRequired()])
@@ -79,7 +85,7 @@ def process_submit_text(form):
                 t = [int(t), ""]
             else:
                 x, y, t, name = ln
-                t = [int(t), name]
+                t = [int(t), escape_html(name)]
             x = int(x)
             y = int(y)
             edge_list.append(EdgeLite(x, y, t))
@@ -110,7 +116,7 @@ def process_submit(form):
         x = int(edge_info['node1'])
         y = int(edge_info['node2'])
         n = max(n, int(x), int(y))
-        t = [edge_info['time'], edge_info['job_name']]
+        t = [edge_info['time'], escape_html(edge_info['job_name'])]
 
         edge_list.append(EdgeLite(x, y, t))
 
